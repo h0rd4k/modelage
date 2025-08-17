@@ -1,5 +1,6 @@
 import streamlit as st
 from models.column import Column
+from utils.helpers import get_prefix, apply_prefix_and_capitalize
 
 def render_column_form(column: Column, table) -> bool:
 	edit_key = f"edit_col{table.table_id}_{column.column_id}"
@@ -56,9 +57,9 @@ def render_column_form(column: Column, table) -> bool:
 			column.nullable = input_nullable
 
 			if column.column_type == "Dimension" and input_column_name.strip():
-				if not input_column_name.startswith("D_"):
-					column.name = f"D_{input_column_name}"
-				base_name = column.name.replace("D_", "").replace("_ID", "")
+				prefix = get_prefix(column.column_type)
+				column.name = apply_prefix_and_capitalize(input_column_name, prefix)
+				base_name = column.name.replace(prefix, "").replace("_ID", "")
 				column.references_schema = st.session_state.get("schema", "")
 				column.references_table = "D_Datum" if column.name.startswith("D_Datum") else base_name
 				column.references_column = "D_Datum_ID" if column.name.startswith("D_Datum") else f"{base_name}_ID"

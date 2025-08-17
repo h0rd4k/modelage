@@ -1,6 +1,5 @@
 import streamlit as st
 from state.session import init_session_state
-from utils.helpers import get_prefix
 from components.sidebar import render_sidebar
 from components.create_table import render_create_table_form
 from components.table_card import render_table_card
@@ -36,11 +35,10 @@ render_sidebar()
 
 selected_type = st.session_state.selected_type
 tables = st.session_state.tables[selected_type]
-prefix = get_prefix(selected_type)
 
 st.markdown(f"## {selected_type}")
 
-render_create_table_form(selected_type, prefix)
+render_create_table_form(selected_type)
 
 for table in tables:
 	render_table_card(table, selected_type)

@@ -5,7 +5,10 @@ def get_prefix(table_type):
 		"Lookup": "L_"
 	}.get(table_type, "")
 
-def check_table_name_prefix(name: str, prefix: str) -> str:
+def apply_prefix_and_capitalize(name: str, prefix: str) -> str:
 	if not name.startswith(prefix):
-		return f"{prefix}{name}"
+		name = f"{prefix}{name}"
+	if name.startswith(prefix):
+		actual_name = name[len(prefix):]
+		name = f"{prefix}{actual_name.capitalize()}"
 	return name

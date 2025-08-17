@@ -1,8 +1,9 @@
 import streamlit as st
 from models.table import Table
-from utils.helpers import check_table_name_prefix
+from utils.helpers import get_prefix, apply_prefix_and_capitalize
 
-def render_create_table_form(selected_type, prefix):
+def render_create_table_form(selected_type):
+	prefix = get_prefix(selected_type)
 	with st.expander("Skapa ny tabell", expanded=False):
 		with st.form("create_table_form"):
 			col1, col2 = st.columns([1, 2])
@@ -13,7 +14,7 @@ def render_create_table_form(selected_type, prefix):
 			submitted = st.form_submit_button("Skapa tabell")
 
 		if submitted and schema and name:
-			name = check_table_name_prefix(name, prefix)
+			name = apply_prefix_and_capitalize(name, prefix)
 			new_table = Table(schema_name=schema, table_name=name, table_type=selected_type)
 
 			if selected_type in ["Fakta", "Dimension"]:
