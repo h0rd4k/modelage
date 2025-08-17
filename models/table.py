@@ -34,8 +34,21 @@ class Table:
 			if col.column_type == "Statisk" and hasattr(col, "template_name"):
 				col.name = col.template_name.replace("{table_name}", self.table_name)
 
-	def add_column(self):
-		self.columns.append(Column())
+	def add_empty_column(self, column_type):
+		return Column(
+			name="",
+			data_type="INT",
+			length="",
+			default_value="",
+			nullable="NULL",
+			is_primary_key=False,
+			is_foreign_key=False,
+			is_identity=False,
+			references_table=None,
+			references_column=None,
+			references_schema=None,
+			column_type=column_type
+		)
 
 	def remove_column(self, index):
 		if 0 <= index < len(self.columns):
@@ -74,6 +87,7 @@ class Table:
 			"columns": [col.to_dict() for col in self.columns]
 		}
 
+	@staticmethod
 	def from_dict(data):
 		table = Table(
 			schema_name=data.get("schema_name", ""),
@@ -83,5 +97,5 @@ class Table:
 		)
 		for col_data in data.get("columns", []):
 			table.columns.append(Column.from_dict(col_data))
-			table.update_static_column_names()
+		table.update_static_column_names()
 		return table

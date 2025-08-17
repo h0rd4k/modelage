@@ -46,6 +46,7 @@ class Column:
 			"column_id": self.column_id
 		}
 
+	@staticmethod
 	def from_dict(data):
 		return Column(
 			name=data.get("name", ""),

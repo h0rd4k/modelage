@@ -4,22 +4,31 @@ from utils.sql_generator import generate_sql
 from models.column import Column
 
 def render_table_metadata_form(table):
-	old_name = table.table_name
+	edit_key = f"edit_table{table.table_id}"
+	save_key = f"save_table_btn_{edit_key}"
+
+	if save_key not in st.session_state:
+		st.session_state[save_key] = False
+
 	col1, col2 = st.columns([1, 2])
 	with col1:
-		schema = st.text_input("Schema", value=table.schema_name, key=f"schema_{table.table_id}")
+		input_schema_name = st.text_input("Schema", value=table.schema_name, key=f"schema__name_{edit_key}")
 	with col2:
-		table_name = st.text_input("Tabellnamn", value=table.table_name, key=f"table_name_{table.table_id}")
+		input_table_name = st.text_input("Tabellnamn", value=table.table_name, key=f"table_name_{edit_key}")
 
-	if schema != table.schema_name or table_name != table.table_name:
-		table.schema_name = schema
-		table.table_name = table_name
-		table.update_static_column_names()
-		st.session_state.metadata_updated = True
-		st.rerun()
+	has_changed = (
+		input_schema_name != table.schema_name or
+		input_table_name != table.table_name
+	)
+	st.session_state[save_key] = has_changed
 
-	if table.table_name != old_name:
-		table.update_static_column_names()
+	if st.session_state[save_key]:
+		if st.button("Spara", key=f"save_btn_{edit_key}"):
+			table.schema_name = input_schema_name
+			table.table_name = input_table_name
+			table.update_static_column_names()
+			st.session_state[save_key] = False
+			#st.rerun()
 
 def render_table_columns_editor(table):
 	st.markdown("#### Kolumner")
@@ -32,8 +41,6 @@ def render_table_columns_editor(table):
 					break
 			st.session_state.pending_column_delete = None
 			st.rerun()
-
-	indexed_columns = list(enumerate(table.get_sorted_columns()))
 
 	for col_type in ["Statisk", "Dimension", "Information"]:
 		if col_type == "Dimension" and table.table_type != "Fakta":
@@ -54,20 +61,7 @@ def render_table_columns_editor(table):
 			render_column_form(cols, table)
 
 		if st.button(f"Ny kolumn", key=f"add_{col_type}_{table.table_id}"):
-			table.columns.append(Column(
-				name="",
-				data_type="INT",
-				length="",
-				default_value="",
-				nullable="NULL",
-				is_primary_key=False,
-				is_foreign_key=False,
-				is_identity=False,
-				references_table=None,
-				references_column=None,
-				references_schema=None,
-				column_type=col_type
-			))
+			table.columns.append(table.add_empty_column(col_type))
 			st.rerun()
 
 def render_sql_preview(table):
