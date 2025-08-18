@@ -5,7 +5,8 @@ def init_session_state():
 		"tables": {
 			"Fakta": [],
 			"Dimension": [],
-			"Lookup": []
+			"Lookup": [],
+			"Stage": []
 		},
 		"selected_type": "Fakta",
 		"editing_index": None,

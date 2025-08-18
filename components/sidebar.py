@@ -4,8 +4,8 @@ from utils.json_utils import import_model, export_model
 def render_sidebar():
 	with st.sidebar:
 		st.markdown("## Tabelltyper")
-		for table_type in ["Fakta", "Dimension", "Lookup"]:
-			if st.button(table_type):
+		for table_type in ["Fakta", "Dimension", "Lookup", "Stage"]:
+			if st.button(table_type, width=100):
 				st.session_state.selected_type = table_type
 				st.session_state.editing_index = None
 
