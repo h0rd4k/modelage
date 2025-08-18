@@ -1,6 +1,6 @@
 import streamlit as st
 from models.column import Column
-from utils.helpers import get_prefix, apply_prefix_and_capitalize
+from utils.helpers import capitalize_first
 
 def render_column_form(column: Column, table) -> bool:
 	edit_key = f"edit_col{table.table_id}_{column.column_id}"
@@ -53,8 +53,8 @@ def render_column_form(column: Column, table) -> bool:
 			column.role_name = role_input.strip() if role_input else None
 
 			base_column_name = f"{selected_table}_ID"
-			column.name = f"{base_column_name}_{column.role_name}" if column.role_name else base_column_name
-
+			role_playing = capitalize_first(column.role_name) if column.role_name else ""
+			column.name = f"{base_column_name}_{role_playing}" if role_playing else base_column_name
 		else:
 			input_column_name = st.text_input("Kolumnnamn", value=column.name, key=f"name_{edit_key}")
 
@@ -100,6 +100,7 @@ def render_column_form(column: Column, table) -> bool:
 
 			if column.column_type != "Dimension":
 				column.name = input_column_name
+				column.name = capitalize_first(input_column_name)
 
 			column.data_type = input_data_type
 			column.length = input_length
