@@ -4,6 +4,7 @@ from utils.helpers import get_prefix, apply_prefix_and_capitalize
 
 def render_create_table_form(selected_type):
 	prefix = get_prefix(selected_type)
+	
 	with st.expander("Skapa ny tabell", expanded=False):
 		with st.form("create_table_form"):
 			col1, col2 = st.columns([1, 2])

@@ -38,6 +38,23 @@ def render_table_card(table, selected_type):
 					})
 				st.table(data)
 
+		if table.table_type == "Fakta":
+			st.markdown("##### Dimensioner")
+			dimension_links = []
+			for col in table.columns:
+				if col.column_type == "Dimension" and hasattr(col, "is_foreign_key") and col.is_foreign_key:
+					dimension_links.append({
+						"Nyckelkolumn": col.name,
+						"Dimensionstabell": f"[{col.references_schema}].[{col.references_table}]",
+						"Referenskolumn": col.references_column,
+						"Datatyp": col.data_type
+					})
+
+			if dimension_links:
+				st.table(dimension_links)
+			else:
+				st.info("Inga kopplade dimensionstabeller hittades.")
+
 		with tab2:
 			render_table_columns_editor(table)
 

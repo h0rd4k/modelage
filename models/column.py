@@ -11,7 +11,7 @@ class Column:
 
 	def __init__(self, name="", data_type="INT", length="", default_value="", nullable="NULL",
 		is_primary_key=False, is_foreign_key=False, is_identity=False,
-		references_table=None, references_column=None, references_schema=None,
+		references_table=None, references_column=None, references_schema=None, role_name=None,
 		column_type="Information", column_id=None, template_name=None):
 			self.name = name
 			self.template_name = template_name or name
@@ -25,6 +25,7 @@ class Column:
 			self.references_table = references_table
 			self.references_column = references_column
 			self.references_schema = references_schema
+			self.role_name = role_name
 			self.column_type = column_type
 			self.column_id = column_id or str(uuid.uuid4())
 
@@ -42,6 +43,7 @@ class Column:
 			"references_table": self.references_table,
 			"references_column": self.references_column,
 			"references_schema": self.references_schema,
+			"role_name": self.role_name,
 			"column_type": self.column_type,
 			"column_id": self.column_id
 		}
@@ -61,6 +63,7 @@ class Column:
 			references_table=data.get("references_table", None),
 			references_column=data.get("references_column", None),
 			references_schema=data.get("references_schema", None),
+			role_name=data.get("role_name", None),
 			column_type=data.get("column_type", "Information"),
 			column_id=data.get("column_id", str(uuid.uuid4()))
 	)

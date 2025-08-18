@@ -7,20 +7,57 @@ def render_column_form(column: Column, table) -> bool:
 	delete_key = f"delete_col_btn_{table.table_id}_{column.column_id}"
 	save_key = f"save_col_btn_{edit_key}"
 
+	if save_key not in st.session_state:
+		st.session_state[save_key] = False
+
 	old_column_values = {
 		"name": column.name,
 		"data_type": column.data_type,
 		"length": column.length,
 		"default_value": column.default_value,
-		"nullable": column.nullable
+		"nullable": column.nullable,
+		"references_schema": column.references_schema,
+		"references_table": column.references_table,
+		"references_column": column.references_column,
+		"role_name": column.role_name
 	}
-
-	if save_key not in st.session_state:
-		st.session_state[save_key] = False
 
 	col1, col2, col3, col4, col5, col6 = st.columns([5, 4, 3, 2, 2, 2])
 	with col1:
-		input_column_name = st.text_input("Kolumnnamn", value=column.name, key=f"name_{edit_key}")
+		if column.column_type == "Dimension":
+			dimension_tables = st.session_state.tables.get("Dimension", [])
+			dimension_options = [
+				f"[{tbl.schema_name}].[{tbl.table_name}]"
+				for tbl in dimension_tables
+			]
+
+			if not dimension_options:
+				st.error("Inga dimensionstabeller har skapats ännu, vilket krävs för att kunna lägga till en dimensionskolumn.")
+				return False
+			current_ref = f"[{column.references_schema}].[{column.references_table}]" if column.references_schema and column.references_table else dimension_options[0]
+
+			selected_ref = st.selectbox(
+				"Välj dimensionstabell",
+				options=dimension_options,
+				index=dimension_options.index(current_ref) if current_ref in dimension_options else 0,
+				key=f"ref_table_{edit_key}"
+			)
+
+			selected_schema, selected_table = selected_ref.strip("[]").split("].[")
+			column.references_schema = selected_schema
+			column.references_table = selected_table
+			column.references_column = f"{selected_table}_ID"
+			column.is_foreign_key = True
+
+			role_input = st.text_input("Rollspelande namn (valfritt)", value=column.role_name or "", key=f"role_name_{edit_key}")
+			column.role_name = role_input.strip() if role_input else None
+
+			base_column_name = f"{selected_table}_ID"
+			column.name = f"{base_column_name}_{column.role_name}" if column.role_name else base_column_name
+
+		else:
+			input_column_name = st.text_input("Kolumnnamn", value=column.name, key=f"name_{edit_key}")
+
 	with col2:
 		input_data_type = st.selectbox("Datatyp", Column.data_types, index=Column.data_types.index(column.data_type) if column.data_type in Column.data_types else 0, key=f"data_type_{edit_key}")
 	with col3:
@@ -36,34 +73,38 @@ def render_column_form(column: Column, table) -> bool:
 			st.rerun()
 
 	has_changed = (
-		input_column_name != old_column_values["name"] or
 		input_data_type != old_column_values["data_type"] or
 		input_length != old_column_values["length"] or
 		input_default_value != old_column_values["default_value"] or
 		input_nullable != old_column_values["nullable"]
 	)
+
+	if column.column_type == "Dimension":
+		has_changed = has_changed or (
+			column.references_schema != old_column_values["references_schema"] or
+			column.references_table != old_column_values["references_table"] or
+			column.references_column != old_column_values["references_column"] or
+			column.role_name != old_column_values["role_name"] or
+			column.name != old_column_values["name"]
+		)
+	else:
+		has_changed = has_changed or input_column_name != old_column_values["name"]
+
 	st.session_state[save_key] = has_changed
 
 	if st.session_state[save_key]:
 		if st.button("Spara", key=f"save_col_{edit_key}"):
-			if not input_column_name.strip():
+			if column.column_type != "Dimension" and not input_column_name.strip():
 				st.error("Kolumnnamn får inte vara tomt.")
 				return False
 
-			column.name = input_column_name
+			if column.column_type != "Dimension":
+				column.name = input_column_name
+
 			column.data_type = input_data_type
 			column.length = input_length
 			column.default_value = input_default_value
 			column.nullable = input_nullable
-
-			if column.column_type == "Dimension" and input_column_name.strip():
-				prefix = get_prefix(column.column_type)
-				column.name = apply_prefix_and_capitalize(input_column_name, prefix)
-				base_name = column.name.replace(prefix, "").replace("_ID", "")
-				column.references_schema = st.session_state.get("schema", "")
-				column.references_table = "D_Datum" if column.name.startswith("D_Datum") else base_name
-				column.references_column = "D_Datum_ID" if column.name.startswith("D_Datum") else f"{base_name}_ID"
-				column.is_foreign_key = True
 
 			st.session_state[save_key] = False
 			st.rerun()
