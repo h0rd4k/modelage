@@ -9,7 +9,7 @@ def render_create_table_form(selected_type):
 		with st.form("create_table_form"):
 			col1, col2 = st.columns([1, 2])
 			with col1:
-				schema = st.text_input("Schema")
+				schema = st.text_input("Schema", placeholder="dbo") or "dbo"
 			with col2:
 				name = st.text_input("Tabellnamn")
 			submitted = st.form_submit_button("Skapa tabell")
@@ -22,4 +22,4 @@ def render_create_table_form(selected_type):
 				new_table.add_static_table_columns()
 
 			st.session_state.tables[selected_type].append(new_table)
-			st.success("Tabell skapad!")
+			st.success(f"Tabell {schema}.{name} skapad")
