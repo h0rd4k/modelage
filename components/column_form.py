@@ -3,6 +3,7 @@ from models.column import Column
 from utils.helpers import capitalize_first
 
 def render_column_form(column: Column, table) -> bool:
+	st.session_state.editing_column = True
 	edit_key = f"edit_col{table.table_id}_{column.column_id}"
 	delete_key = f"delete_col_btn_{table.table_id}_{column.column_id}"
 	save_key = f"save_col_btn_{edit_key}"
@@ -107,7 +108,9 @@ def render_column_form(column: Column, table) -> bool:
 			column.default_value = input_default_value
 			column.nullable = input_nullable
 
+			table.columns.sort(key=lambda col: col.name.lower())
 			st.session_state[save_key] = False
+			st.session_state.editing_column = False
 			st.rerun()
 
 	return False
