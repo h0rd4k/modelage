@@ -26,7 +26,8 @@ class Table:
 				is_primary_key=col_def.get("is_primary_key", False),
 				is_foreign_key=col_def.get("is_foreign_key", False),
 				is_identity=col_def.get("is_identity", False),
-				column_type=col_def.get("column_type", "Information")
+				column_type=col_def.get("column_type", "Information"),
+				sort_order=col_def.get("sort_order")
 			))
 
 	def update_static_column_names(self):
@@ -34,7 +35,7 @@ class Table:
 			if col.column_type == "Statisk" and hasattr(col, "template_name"):
 				col.name = col.template_name.replace("{table_name}", self.table_name)
 
-	def add_empty_column(self, column_type):
+	def add_new_column(self, column_type):
 		return Column(
 			name="",
 			data_type="INT",
@@ -63,19 +64,21 @@ class Table:
 		}
 		def sort_key(col):
 			name = col.name.lower()
+
 			if col.column_type == "Statisk" and hasattr(col, "template_name") and "{table_name}" in col.template_name:
-					return (0, name)
-			
+				return (0, name)
+
 			if col.column_type in ["Dimension", "Information"]:
-					return (1, name)
-			
+				return (1, name)
+
+			if col.column_type == "Statisk" and col.sort_order is not None:
+				return (3, col.sort_order, name)
+
 			if col.column_type == "Statisk":
-				if not hasattr(col, "template_name") or name not in static_columns:
-					return (2, name)
-				else:
-					return (3, name)
-			
+				return (2, name)
+
 			return (4, name)
+		
 		return sorted(self.columns, key=sort_key)
 
 	def to_dict(self):

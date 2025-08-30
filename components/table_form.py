@@ -61,7 +61,7 @@ def render_table_columns_editor(table):
 			render_column_form(cols, table)
 
 		if st.button(f"Ny kolumn", key=f"add_{col_type}_{table.table_id}"):
-			table.columns.append(table.add_empty_column(col_type))
+			table.columns.append(table.add_new_column(col_type))
 			st.rerun()
 
 def render_sql_preview(table):

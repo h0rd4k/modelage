@@ -12,7 +12,7 @@ class Column:
 	def __init__(self, name="", data_type="INT", length="", default_value="", nullable="NULL",
 		is_primary_key=False, is_foreign_key=False, is_identity=False,
 		references_table=None, references_column=None, references_schema=None, role_name=None,
-		column_type="Information", column_id=None, template_name=None):
+		column_type="Information", column_id=None, template_name=None, sort_order=None):
 			self.name = name
 			self.template_name = template_name or name
 			self.data_type = data_type
@@ -28,6 +28,7 @@ class Column:
 			self.role_name = role_name
 			self.column_type = column_type
 			self.column_id = column_id or str(uuid.uuid4())
+			self.sort_order = sort_order
 
 	def to_dict(self):
 		return {
@@ -45,7 +46,8 @@ class Column:
 			"references_schema": self.references_schema,
 			"role_name": self.role_name,
 			"column_type": self.column_type,
-			"column_id": self.column_id
+			"column_id": self.column_id,
+			"sort_order": self.sort_order
 		}
 
 	@staticmethod
@@ -65,5 +67,6 @@ class Column:
 			references_schema=data.get("references_schema", None),
 			role_name=data.get("role_name", None),
 			column_type=data.get("column_type", "Information"),
-			column_id=data.get("column_id", str(uuid.uuid4()))
+			column_id=data.get("column_id", str(uuid.uuid4())),
+			sort_order=data.get("sort_order", None)
 	)
